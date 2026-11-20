@@ -13,7 +13,7 @@ règles de monte des dragons **Ice and Fire** et lien progressif joueur / dragon
 
 ## Installation
 
-1. Placez `citizenfactions-1.0.0.jar` dans `mods/` **du serveur et des joueurs** (l'interface et la barre de lien sont côté client).
+1. Placez `citizenfactions-1.1.0.jar` dans `mods/` **du serveur et des joueurs** (l'interface et la barre de lien sont côté client).
    Avec Citizen Updater, déposez simplement le jar dans le pack.
 2. Ice and Fire doit être installé (sinon le mod démarre mais ne reconnaît aucun dragon ; un avertissement apparaît dans les logs).
 3. Au premier démarrage, les factions **Dragonnier** et **Chasseur de dragon** sont créées avec leurs grades et emblèmes.
@@ -42,6 +42,28 @@ Configuration : `world/serverconfig/citizenfactions-server.toml` (serveur) et `c
 - Lien faible : refus de monte (jusqu'à 35 % à 0), mouvements brusques (< 50 %), désarçonnage possible (< 10 %), dragon plus lent (−25 % à 0).
 - Lien élevé : plus aucun refus, vitesse jusqu'à +10 %, régénération du dragon pendant la monte (≥ 80 %).
 - Tous les réglages sont dans la section `[bond]` de la config.
+
+## Dragons primordiaux
+
+Un par faction, réservés au grade ayant la permission `MONTER_PRIMORDIAL` **de leur faction** (Primodiau par défaut ;
+les sauvegardes existantes reçoivent ce droit automatiquement pour le grade le plus haut).
+
+| | Dragonnier | Chasseur de dragon |
+|---|---|---|
+| Base Ice and Fire | dragon de glace **Blanc** | dragon de foudre **Noir** |
+| Souffle | accompagné de **flammes bleues**, embrase les cibles | accompagné de **flammes rouges**, embrase les cibles |
+| Taille, vie, dégâts, vitesse, armure | ×2 | ×2 |
+
+Tous les multiplicateurs sont réglables dans la section `[primordial]` de la config.
+La taille passe par un mixin sur `EntityDragonBase.getRenderSize/getScale` (Ice and Fire calcule lui-même la taille de ses dragons) ;
+s'il ne trouve pas ces méthodes dans le portage, il ne fait rien (le dragon garde sa taille normale, le reste fonctionne).
+
+```
+/factions admin primordial creer dragonnier|chasseur [propriétaire]   invoque le primordial adulte devant vous
+/factions admin primordial marquer dragonnier|chasseur                transforme le dragon regardé (bonne espèce requise)
+/factions admin primordial retirer                                    le dragon regardé redevient ordinaire
+/factions admin primordial liste
+```
 
 ## Interface
 
@@ -83,7 +105,7 @@ Les joueurs hors ligne sont gérés (ils doivent s'être connectés au moins une
 
 ## Compilation
 
-`./gradlew build` → `build/libs/citizenfactions-1.0.0.jar`. GitHub Actions compile et publie une Release à chaque push.
+`./gradlew build` → `build/libs/citizenfactions-1.1.0.jar`. GitHub Actions compile et publie une Release à chaque push.
 
 ## Compatibilité
 

@@ -4,12 +4,15 @@ license = "All Rights Reserved"
 
 [[mods]]
 modId = "citizenfactions"
-version = "1.0.0"
+version = "1.1.0"
 displayName = "Citizen Factions"
 authors = "Citizen"
 description = '''
 Factions RP du serveur Citizen (Dragonniers, Chasseurs de dragon) : grades, emblemes, regles de monte Ice and Fire et lien progressif avec les dragons.
 '''
+
+[[mixins]]
+config = "citizenfactions.mixins.json"
 
 [[dependencies.citizenfactions]]
 modId = "neoforge"

@@ -81,6 +81,8 @@ public final class BondSystem {
         DragonRecord d = s.dragonRecord(dragon.getUUID());
         String name = dragon.hasCustomName() && dragon.getCustomName() != null ? dragon.getCustomName().getString() : "";
         d.describe(info.species(), info.variantLabel(), info.corrupted(), name, info.tamed() ? info.owner() : null, info.stage());
+        String prim = PrimordialState.kind(dragon);
+        d.primordial(prim == null ? "" : prim);
         d.seen(dragon.level().dimension().location().toString(), dragon.getBlockX(), dragon.getBlockY(), dragon.getBlockZ(), System.currentTimeMillis());
         d.bonds().clear();
         d.bonds().putAll(readBonds(dragon));
@@ -95,6 +97,14 @@ public final class BondSystem {
         if (Config.get(Config.ADMIN_BYPASS) && Admins.is(p)) return null;
         Faction f = rt.service().factionOf(p.getUUID());
         if (f == null) return "Vous n'appartenez à aucune faction : vous ne pouvez pas avoir de dragon.";
+        String prim = PrimordialState.kind(dragonEntity(info));
+        if (prim != null) {
+            if (!prim.equals(f.id()))
+                return "Ce dragon primordial est réservé à la faction « " + nameOfFaction(prim) + " ».";
+            if (!rt.service().has(p.getUUID(), FactionPermission.MONTER_PRIMORDIAL))
+                return "Seul le grade le plus élevé de votre faction (Primodiau) peut monter le " + Primordial.label(prim) + ".";
+            return null;
+        }
         if (!f.rule().allows(info.corrupted())) {
             return switch (f.rule()) {
                 case NON_CORROMPUS -> "Faction " + f.name() + " : vous ne pouvez pas monter un dragon corrompu (" + info.variantLabel() + ").";
@@ -104,6 +114,13 @@ public final class BondSystem {
         }
         return null;
     }
+
+    private String nameOfFaction(String id) {
+        Faction f = rt.service().faction(id);
+        return f == null ? id : f.name();
+    }
+
+    private static Entity dragonEntity(DragonBridge.Info info) { return info.entity(); }
 
     /** Tirage du refus de monte du a un lien faible. */
     public boolean refuses(LivingEntity dragon, UUID player) {

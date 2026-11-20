@@ -21,5 +21,5 @@ public final class Grade {
     public Set<FactionPermission> perms() { return java.util.Collections.unmodifiableSet(perms); }
     public boolean has(FactionPermission p) { return perms.contains(p); }
     void toggle(FactionPermission p) { if (!perms.remove(p)) perms.add(p); }
-    void set(FactionPermission p, boolean on) { if (on) perms.add(p); else perms.remove(p); }
+    public void set(FactionPermission p, boolean on) { if (on) perms.add(p); else perms.remove(p); }
 }

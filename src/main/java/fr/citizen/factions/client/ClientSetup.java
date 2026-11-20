@@ -4,6 +4,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 import fr.citizen.factions.CitizenFactions;
 import fr.citizen.factions.platform.ActionPayload;
 import fr.citizen.factions.platform.Network;
+import fr.citizen.factions.platform.PrimordialState;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import fr.citizen.factions.ui.View;
 import fr.citizen.factions.ui.ViewCodec;
 import net.minecraft.client.KeyMapping;
@@ -31,6 +33,11 @@ public final class ClientSetup {
         modBus.addListener((RegisterKeyMappingsEvent e) -> e.register(OPEN_KEY));
         modBus.addListener(BondHud::register);
         Network.clientBondHandler = p -> Minecraft.getInstance().execute(() -> BondHud.update(p));
+        Network.clientPrimordialHandler = p -> {
+            if (p.kind().isEmpty()) PrimordialState.CLIENT.remove(p.uuid());
+            else PrimordialState.CLIENT.put(p.uuid(), p.kind());
+        };
+        NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> PrimordialState.CLIENT.clear());
         NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post e) -> {
             Minecraft mc = Minecraft.getInstance();
             while (OPEN_KEY.consumeClick()) {

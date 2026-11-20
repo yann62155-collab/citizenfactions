@@ -117,6 +117,21 @@ class FactionServiceTest {
     }
 
     @Test
+    void primordialPermissionDefaultsAndMigration() {
+        FactionService s = seeded();
+        Faction d = s.requireFaction("dragonnier");
+        assertTrue(d.grade("primodiau").has(FactionPermission.MONTER_PRIMORDIAL));
+        assertFalse(d.grade("alpha").has(FactionPermission.MONTER_PRIMORDIAL));
+        // ancienne sauvegarde (format 1) : le Primodiau recoit le nouveau droit
+        String old = FactionStore.toJson(s).replace("\"format\":2", "\"format\":1").replace(",\"MONTER_PRIMORDIAL\"", "");
+        assertFalse(old.contains("MONTER_PRIMORDIAL"));
+        FactionService r = new FactionService(clock::get);
+        FactionStore.fromJson(old, r);
+        assertTrue(r.requireFaction("chasseur").grade("primodiau").has(FactionPermission.MONTER_PRIMORDIAL));
+        assertFalse(r.requireFaction("chasseur").grade("petit").has(FactionPermission.MONTER_PRIMORDIAL));
+    }
+
+    @Test
     void deleteFactionFreesMembers() {
         FactionService s = seeded();
         s.addMember("chasseur", bob, "Bob", null);

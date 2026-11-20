@@ -62,6 +62,9 @@ public class CitizenFactions {
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, DragonGuard::onRightClickItem);
         NeoForge.EVENT_BUS.addListener(DragonGuard::onJoin);
         NeoForge.EVENT_BUS.addListener(DragonGuard::onDeath);
+        NeoForge.EVENT_BUS.addListener(DragonGuard::onLeave);
+        NeoForge.EVENT_BUS.addListener(DragonGuard::onStartTracking);
+        NeoForge.EVENT_BUS.addListener(DragonGuard::onIncomingDamage);
 
         if (FMLEnvironment.dist == Dist.CLIENT) fr.citizen.factions.client.ClientSetup.init(modBus);
     }

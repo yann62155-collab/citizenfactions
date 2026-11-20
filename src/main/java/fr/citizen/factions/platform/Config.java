@@ -26,6 +26,13 @@ public final class Config {
     public static final ModConfigSpec.DoubleValue MAX_REFUSE;
     public static final ModConfigSpec.BooleanValue BEHAVIOUR;
 
+    public static final ModConfigSpec.DoubleValue PRIMORDIAL_SIZE;
+    public static final ModConfigSpec.DoubleValue PRIMORDIAL_HEALTH;
+    public static final ModConfigSpec.DoubleValue PRIMORDIAL_DAMAGE;
+    public static final ModConfigSpec.DoubleValue PRIMORDIAL_SPEED;
+    public static final ModConfigSpec.DoubleValue PRIMORDIAL_ARMOR;
+    public static final ModConfigSpec.IntValue PRIMORDIAL_BURN_SECONDS;
+
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
         b.comment("Administration de Citizen Factions").push("admin");
@@ -73,6 +80,15 @@ public final class Config {
                 .defineInRange("maxMountRefuseChance", 0.35, 0.0, 1.0);
         BEHAVIOUR = b.comment("Active les effets du lien sur le dragon (refus, mouvements brusques, désarçonnage, vitesse, régénération).")
                 .define("behaviourEffects", true);
+        b.pop();
+
+        b.comment("Dragons primordiaux (un par faction, réservés au grade ayant MONTER_PRIMORDIAL, Primodiau par défaut)").push("primordial");
+        PRIMORDIAL_SIZE = b.comment("Taille par rapport à un dragon normal du même âge.").defineInRange("sizeMultiplier", 2.0, 1.0, 4.0);
+        PRIMORDIAL_HEALTH = b.comment("Points de vie maximum (multiplicateur).").defineInRange("healthMultiplier", 2.0, 1.0, 10.0);
+        PRIMORDIAL_DAMAGE = b.comment("Dégâts infligés : morsure, griffes et souffle (multiplicateur).").defineInRange("damageMultiplier", 2.0, 1.0, 10.0);
+        PRIMORDIAL_SPEED = b.comment("Vitesse (multiplicateur). Baissez-la si le dragon devient difficile à piloter.").defineInRange("speedMultiplier", 2.0, 1.0, 4.0);
+        PRIMORDIAL_ARMOR = b.comment("Armure (multiplicateur).").defineInRange("armorMultiplier", 2.0, 1.0, 10.0);
+        PRIMORDIAL_BURN_SECONDS = b.comment("Secondes d'embrasement des cibles touchées par le souffle d'un primordial.").defineInRange("burnSeconds", 8, 0, 60);
         b.pop();
         SPEC = b.build();
     }

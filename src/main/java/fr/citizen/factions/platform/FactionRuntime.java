@@ -79,6 +79,10 @@ public final class FactionRuntime {
 
     public void tick() {
         ticks++;
+        for (UUID id : PrimordialState.SERVER.keySet()) {
+            net.minecraft.world.entity.Entity e = bonds.find(id);
+            if (e != null && e.isAlive()) Primordial.tickBreath(e);
+        }
         if (ticks % 20 == 0) bonds.tickSecond();
         if (ticks % 200 == 0) bonds.tickSlow();
         if (ticks % 100 == 0 && service.dirty()) saveNow();

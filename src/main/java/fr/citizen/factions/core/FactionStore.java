@@ -14,7 +14,7 @@ import java.util.*;
  * et conservation de la version precedente (.bak) utilisee automatiquement si le fichier principal est illisible.
  */
 public final class FactionStore {
-    public static final int FORMAT = 1;
+    public static final int FORMAT = 2;
     private static final int MAX_FILE = 64 * 1024 * 1024;
 
     private final Path file;
@@ -131,6 +131,7 @@ public final class FactionStore {
             m.put("uuid", d.uuid().toString()); m.put("species", d.species()); m.put("variant", d.variant());
             m.put("corrupted", d.corrupted()); m.put("name", d.customName()); m.put("owner", d.owner() == null ? "" : d.owner().toString());
             m.put("dim", d.dimension()); m.put("x", d.x()); m.put("y", d.y()); m.put("z", d.z()); m.put("stage", d.stage()); m.put("seen", d.lastSeen());
+            m.put("primordial", d.primordial());
             List<Object> bs = new ArrayList<>();
             for (Map.Entry<UUID, Bond> e : d.bonds().entrySet()) {
                 Map<String, Object> bm = new LinkedHashMap<>();
@@ -163,6 +164,9 @@ public final class FactionStore {
                 }
                 f.gradesMutable().add(new Grade(str(gm, "id"), str(gm, "name"), ps));
             }
+            // format 1 -> 2 : le grade le plus haut recoit le droit de monter le dragon primordial
+            if (num(root, "format") < 2 && !f.gradesMutable().isEmpty())
+                f.gradesMutable().get(0).set(FactionPermission.MONTER_PRIMORDIAL, true);
             s.factions.put(f.id(), f);
         }
         for (Map<String, Object> m : list(root, "members")) {
@@ -183,6 +187,7 @@ public final class FactionStore {
             String owner = str(m, "owner");
             d.describe(str(m, "species"), str(m, "variant"), Boolean.TRUE.equals(m.get("corrupted")), str(m, "name"),
                     owner.isBlank() ? null : UUID.fromString(owner), (int) num(m, "stage"));
+            d.primordial(str(m, "primordial"));
             d.seen(str(m, "dim"), (int) num(m, "x"), (int) num(m, "y"), (int) num(m, "z"), num(m, "seen"));
             for (Map<String, Object> bm : list(m, "bonds")) {
                 Object v = bm.get("value");

@@ -377,6 +377,7 @@ public final class FactionUi {
             b.line(d.displayName(), "h", "");
             b.n(d.speciesLabel() + (d.variant().isBlank() ? "" : " — " + d.variant()) + (d.corrupted() ? "  (corrompu)" : "")
                     + "  —  stade " + d.stage());
+            if (!d.primordial().isBlank()) b.g("★ Dragon primordial — réservé au plus haut grade de sa faction");
             b.line("Lien : " + BondMath.percent(v) + " — " + BondMath.tier(v), v >= 50 ? "g" : "r", "");
             b.m(t.equals(d.owner()) ? "Propriétaire : vous" + (self ? "" : " (ce joueur)") : "Propriétaire : autre joueur");
             Bond bd = d.bond(t);

@@ -18,6 +18,7 @@ public final class DragonRecord {
     private String dimension = "";
     private int x, y, z;
     private int stage;
+    private String primordial = "";
     private long lastSeen;
     private final Map<UUID, Bond> bonds = new LinkedHashMap<>();
 
@@ -36,6 +37,9 @@ public final class DragonRecord {
     public int stage() { return stage; }
     public long lastSeen() { return lastSeen; }
     public Map<UUID, Bond> bonds() { return bonds; }
+    /** Faction a laquelle ce dragon primordial est reserve ; vide = dragon ordinaire. */
+    public String primordial() { return primordial; }
+    public void primordial(String factionId) { this.primordial = factionId == null ? "" : factionId; }
 
     public Bond bond(UUID player) { return bonds.getOrDefault(player, Bond.NONE); }
 
@@ -55,6 +59,7 @@ public final class DragonRecord {
     /** Nom lisible : nom donne par le joueur, sinon espece + couleur. */
     public String displayName() {
         if (!customName.isBlank()) return customName;
+        if (!primordial.isBlank()) return speciesLabel() + " primordial";
         return speciesLabel() + (variant.isBlank() ? "" : " " + variant);
     }
 

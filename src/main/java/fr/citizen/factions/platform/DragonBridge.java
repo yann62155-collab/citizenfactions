@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * ce qui donne directement proprietaire et apprivoisement.
  */
 public final class DragonBridge {
-    public record Info(String typeId, String species, int variant, String variantLabel, boolean corrupted, int stage,
+    public record Info(Entity entity, String typeId, String species, int variant, String variantLabel, boolean corrupted, int stage,
                        boolean tamed, UUID owner) { }
 
     private static final ConcurrentHashMap<Class<?>, Method> VARIANT = new ConcurrentHashMap<>();
@@ -76,7 +76,7 @@ public final class DragonBridge {
         UUID owner = null;
         boolean tamed = false;
         if (e instanceof TamableAnimal t) { tamed = t.isTame(); owner = t.getOwnerUUID(); }
-        return new Info(type, species, variant, label(species, variant), corrupted, stage, tamed, owner);
+        return new Info(e, type, species, variant, label(species, variant), corrupted, stage, tamed, owner);
     }
 
     private static String species(String typeId) {

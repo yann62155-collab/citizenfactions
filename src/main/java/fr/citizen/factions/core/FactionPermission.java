@@ -6,7 +6,8 @@ public enum FactionPermission {
     VOIR_DRAGONS("Voir les dragons des membres"),
     GERER_DEMANDES("Accepter / refuser les demandes"),
     PROMOUVOIR("Changer le grade des membres inférieurs"),
-    EXCLURE("Exclure les membres inférieurs");
+    EXCLURE("Exclure les membres inférieurs"),
+    MONTER_PRIMORDIAL("Monter le dragon primordial de la faction");
 
     private final String label;
 

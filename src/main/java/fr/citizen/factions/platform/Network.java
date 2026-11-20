@@ -20,6 +20,7 @@ public final class Network {
     /** Renseignes cote client uniquement (ClientSetup). */
     public static volatile Consumer<String> clientViewHandler;
     public static volatile Consumer<BondPayload> clientBondHandler;
+    public static volatile Consumer<PrimordialPayload> clientPrimordialHandler;
 
     private Network() { }
 
@@ -31,6 +32,10 @@ public final class Network {
         });
         r.playToClient(BondPayload.TYPE, BondPayload.CODEC, (p, ctx) -> {
             Consumer<BondPayload> h = clientBondHandler;
+            if (h != null) h.accept(p);
+        });
+        r.playToClient(PrimordialPayload.TYPE, PrimordialPayload.CODEC, (p, ctx) -> {
+            Consumer<PrimordialPayload> h = clientPrimordialHandler;
             if (h != null) h.accept(p);
         });
         r.playToServer(ActionPayload.TYPE, ActionPayload.CODEC, Network::onAction);

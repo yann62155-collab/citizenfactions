@@ -11,7 +11,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.EntityMountEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -135,14 +139,35 @@ public final class DragonGuard {
         FactionRuntime rt = FactionRuntime.current();
         if (rt == null) return;
         Entity d = e.getEntity();
+        Primordial.onLoaded(d);
         boolean known = rt.service().dragon(d.getUUID()) != null;
         boolean tamed = d instanceof TamableAnimal t && t.isTame();
         // on ne suit que les dragons apprivoises ou deja lies : les dragons sauvages ne sont pas enregistres
         if (known || tamed || !BondSystem.readBonds(d).isEmpty()) rt.bonds().sync(d);
     }
 
+    public static void onLeave(EntityLeaveLevelEvent e) {
+        if (!e.getLevel().isClientSide() && DragonBridge.isDragon(e.getEntity())) Primordial.forget(e.getEntity());
+    }
+
+    public static void onStartTracking(PlayerEvent.StartTracking e) {
+        if (e.getEntity() instanceof ServerPlayer p && DragonBridge.isDragon(e.getTarget())) Primordial.sendTo(p, e.getTarget());
+    }
+
+    /** Souffle d'un primordial : degats multiplies et cible embrasee (la morsure est deja doublee par l'attribut d'attaque). */
+    public static void onIncomingDamage(LivingIncomingDamageEvent e) {
+        if (e.getEntity().level().isClientSide()) return;
+        Entity src = e.getSource().getEntity();
+        if (src == null || Primordial.of(src) == null || src == e.getEntity()) return;
+        if (e.getSource().is(DamageTypes.MOB_ATTACK)) return;
+        e.setAmount(e.getAmount() * Config.get(Config.PRIMORDIAL_DAMAGE).floatValue());
+        int burn = Config.get(Config.PRIMORDIAL_BURN_SECONDS);
+        if (burn > 0) e.getEntity().igniteForSeconds(burn);
+    }
+
     public static void onDeath(LivingDeathEvent e) {
         if (e.getEntity().level().isClientSide() || !DragonBridge.isDragon(e.getEntity())) return;
+        Primordial.forget(e.getEntity());
         FactionRuntime rt = FactionRuntime.current();
         if (rt != null) rt.service().forgetDragon(e.getEntity().getUUID());
     }

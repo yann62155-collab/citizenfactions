@@ -230,10 +230,73 @@ public final class Commands {
                     return dragonInfo(cc, rt, rec);
                 }))));
 
+        a.then(primordial());
         a.then(grades());
         a.then(emblems());
         a.then(literal("sauvegarder").executes(c -> run(c, (cc, rt) -> { rt.saveNow(); return ok(cc, "Données des factions sauvegardées."); })));
         return a;
+    }
+
+    private static final SuggestionProvider<CommandSourceStack> PRIMORDIAL_FACTIONS =
+            (c, b) -> SharedSuggestionProvider.suggest(List.of(Primordial.DRAGONNIER.factionId(), Primordial.CHASSEUR.factionId()), b);
+
+    private static Primordial.Kind primordialKind(CommandContext<CommandSourceStack> c) {
+        Primordial.Kind k = Primordial.kind(StringArgumentType.getString(c, "faction"));
+        if (k == null) throw new FactionException("Seules les factions « dragonnier » et « chasseur » ont un dragon primordial.");
+        return k;
+    }
+
+    private static LiteralArgumentBuilder<CommandSourceStack> primordial() {
+        return literal("primordial")
+                .then(literal("creer").then(argument("faction", StringArgumentType.word()).suggests(PRIMORDIAL_FACTIONS)
+                        .executes(c -> run(c, (cc, rt) -> spawnPrimordial(cc, rt, null)))
+                        .then(argument("proprietaire", StringArgumentType.word()).suggests(PLAYERS)
+                                .executes(c -> run(c, (cc, rt) -> {
+                                    ServerPlayer owner = rt.server().getPlayerList().getPlayerByName(StringArgumentType.getString(cc, "proprietaire"));
+                                    if (owner == null) return fail(cc, "Le propriétaire doit être connecté.");
+                                    return spawnPrimordial(cc, rt, owner);
+                                })))))
+                .then(literal("marquer").then(argument("faction", StringArgumentType.word()).suggests(PRIMORDIAL_FACTIONS)
+                        .executes(c -> run(c, (cc, rt) -> {
+                            if (!(cc.getSource().getEntity() instanceof ServerPlayer p)) return fail(cc, "Commande réservée aux joueurs.");
+                            Entity d = lookedDragon(p);
+                            if (d == null) return fail(cc, "Regardez un dragon (à moins de 24 blocs) ou montez-le.");
+                            Primordial.Kind k = primordialKind(cc);
+                            try { Primordial.mark(d, k); }
+                            catch (IllegalArgumentException e) { return fail(cc, e.getMessage()); }
+                            rt.bonds().sync(d);
+                            return ok(cc, "Ce dragon est désormais le " + k.name() + " (réservé au Primodiau de « " + k.factionId() + " »).");
+                        }))))
+                .then(literal("retirer").executes(c -> run(c, (cc, rt) -> {
+                    if (!(cc.getSource().getEntity() instanceof ServerPlayer p)) return fail(cc, "Commande réservée aux joueurs.");
+                    Entity d = lookedDragon(p);
+                    if (d == null || Primordial.of(d) == null) return fail(cc, "Regardez un dragon primordial.");
+                    Primordial.unmark(d);
+                    rt.bonds().sync(d);
+                    return ok(cc, "Ce dragon redevient un dragon ordinaire.");
+                })))
+                .then(literal("liste").executes(c -> run(c, (cc, rt) -> {
+                    line(cc, "== Dragons primordiaux ==", ChatFormatting.GOLD);
+                    int n = 0;
+                    for (DragonRecord d : rt.service().dragons()) {
+                        if (d.primordial().isBlank()) continue;
+                        n++;
+                        line(cc, d.displayName() + " — " + d.primordial() + " — propriétaire : " + (d.owner() == null ? "aucun" : rt.nameOf(d.owner()))
+                                + " — " + d.dimension() + " " + d.x() + " " + d.y() + " " + d.z(), ChatFormatting.YELLOW);
+                    }
+                    if (n == 0) line(cc, "Aucun.", ChatFormatting.GRAY);
+                    return 1;
+                })));
+    }
+
+    private static int spawnPrimordial(CommandContext<CommandSourceStack> c, FactionRuntime rt, ServerPlayer owner) {
+        if (!(c.getSource().getEntity() instanceof ServerPlayer p)) return fail(c, "Commande réservée aux joueurs.");
+        Primordial.Kind k = primordialKind(c);
+        Entity d;
+        try { d = Primordial.spawn(p, k, owner); }
+        catch (IllegalStateException | IllegalArgumentException e) { return fail(c, e.getMessage()); }
+        rt.bonds().sync(d);
+        return ok(c, k.name() + " invoqué" + (owner == null ? " (sauvage)" : " pour " + owner.getGameProfile().getName()) + ".");
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> grades() {
@@ -350,6 +413,7 @@ public final class Commands {
         line(c, "== " + d.displayName() + " ==", ChatFormatting.GOLD);
         line(c, "UUID : " + d.uuid(), ChatFormatting.GRAY);
         line(c, d.speciesLabel() + " — " + d.variant() + (d.corrupted() ? " (CORROMPU)" : " (non corrompu)") + " — stade " + d.stage(), ChatFormatting.YELLOW);
+        if (!d.primordial().isBlank()) line(c, "★ " + Primordial.label(d.primordial()) + " (faction " + d.primordial() + ")", ChatFormatting.LIGHT_PURPLE);
         line(c, "Propriétaire : " + (d.owner() == null ? "aucun (sauvage)" : rt.nameOf(d.owner())), ChatFormatting.YELLOW);
         line(c, "Position : " + d.dimension() + " " + d.x() + " " + d.y() + " " + d.z() + " (" + date(d.lastSeen()) + ")", ChatFormatting.GRAY);
         if (d.bonds().isEmpty()) line(c, "Aucun lien.", ChatFormatting.GRAY);
