@@ -32,6 +32,7 @@ public final class Config {
     public static final ModConfigSpec.DoubleValue PRIMORDIAL_SPEED;
     public static final ModConfigSpec.DoubleValue PRIMORDIAL_ARMOR;
     public static final ModConfigSpec.IntValue PRIMORDIAL_BURN_SECONDS;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> GRADE_AURAS;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -89,6 +90,13 @@ public final class Config {
         PRIMORDIAL_SPEED = b.comment("Vitesse (multiplicateur). Baissez-la si le dragon devient difficile à piloter.").defineInRange("speedMultiplier", 2.0, 1.0, 4.0);
         PRIMORDIAL_ARMOR = b.comment("Armure (multiplicateur).").defineInRange("armorMultiplier", 2.0, 1.0, 10.0);
         PRIMORDIAL_BURN_SECONDS = b.comment("Secondes d'embrasement des cibles touchées par le souffle d'un primordial.").defineInRange("burnSeconds", 8, 0, 60);
+        b.pop();
+
+        b.comment("Auras de grade, affichées par le mod Citizen Aura (s'il est installé)").push("auras");
+        GRADE_AURAS = b.comment("« identifiant_du_grade=RRGGBB:style » (styles : eclair, orbite, spirale, halo). S'applique à toutes les factions.",
+                        " Une aura donnée à la main avec /aura donner reste prioritaire.")
+                .defineListAllowEmpty("gradeAuras", List.of("alpha=FFFFFF:eclair", "primodiau=E02020:eclair"),
+                        () -> "alpha=FFFFFF:eclair", o -> o instanceof String);
         b.pop();
         SPEC = b.build();
     }

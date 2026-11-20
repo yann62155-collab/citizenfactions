@@ -85,6 +85,7 @@ public final class FactionRuntime {
         }
         if (ticks % 20 == 0) bonds.tickSecond();
         if (ticks % 200 == 0) bonds.tickSlow();
+        if (ticks % 40 == 0) GradeAuras.refresh(this);
         if (ticks % 100 == 0 && service.dirty()) saveNow();
         if (ticks % 1200 == 0) rate.clear();
     }
@@ -108,6 +109,7 @@ public final class FactionRuntime {
     public void onLogout(ServerPlayer p) {
         service.seen(p.getUUID(), p.getGameProfile().getName());
         bonds.onLogout(p);
+        GradeAuras.remove(p);
     }
 
     public void open(ServerPlayer p, String view, Map<String, String> params) {

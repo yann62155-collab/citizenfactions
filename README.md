@@ -13,7 +13,7 @@ règles de monte des dragons **Ice and Fire** et lien progressif joueur / dragon
 
 ## Installation
 
-1. Placez `citizenfactions-1.1.0.jar` dans `mods/` **du serveur et des joueurs** (l'interface et la barre de lien sont côté client).
+1. Placez `citizenfactions-1.2.0.jar` dans `mods/` **du serveur et des joueurs** (l'interface et la barre de lien sont côté client).
    Avec Citizen Updater, déposez simplement le jar dans le pack.
 2. Ice and Fire doit être installé (sinon le mod démarre mais ne reconnaît aucun dragon ; un avertissement apparaît dans les logs).
 3. Au premier démarrage, les factions **Dragonnier** et **Chasseur de dragon** sont créées avec leurs grades et emblèmes.
@@ -65,6 +65,11 @@ s'il ne trouve pas ces méthodes dans le portage, il ne fait rien (le dragon gar
 /factions admin primordial liste
 ```
 
+## Auras de grade (avec Citizen Aura 1.2.0+)
+
+Alpha : **éclair blanc**, Primodiau : **éclair rouge**, dans toutes les factions. Mis à jour toutes les 2 secondes
+(changement de grade, exclusion…). Réglable dans `[auras] gradeAuras`. Une aura donnée à la main avec `/aura donner` reste prioritaire.
+
 ## Interface
 
 Touche **U** (modifiable : Options > Commandes > Citizen Factions) ou `/factions`.
@@ -105,7 +110,7 @@ Les joueurs hors ligne sont gérés (ils doivent s'être connectés au moins une
 
 ## Compilation
 
-`./gradlew build` → `build/libs/citizenfactions-1.1.0.jar`. GitHub Actions compile et publie une Release à chaque push.
+`./gradlew build` → `build/libs/citizenfactions-1.2.0.jar`. GitHub Actions compile et publie une Release à chaque push.
 
 ## Compatibilité
 
