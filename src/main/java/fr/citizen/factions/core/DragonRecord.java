@@ -19,6 +19,7 @@ public final class DragonRecord {
     private int x, y, z;
     private int stage;
     private String primordial = "";
+    private boolean downed;
     private long lastSeen;
     private final Map<UUID, Bond> bonds = new LinkedHashMap<>();
 
@@ -39,6 +40,8 @@ public final class DragonRecord {
     public Map<UUID, Bond> bonds() { return bonds; }
     /** Faction a laquelle ce dragon primordial est reserve ; vide = dragon ordinaire. */
     public String primordial() { return primordial; }
+    public boolean downed() { return downed; }
+    public void downed(boolean d) { downed = d; }
     public void primordial(String factionId) { this.primordial = factionId == null ? "" : factionId; }
 
     public Bond bond(UUID player) { return bonds.getOrDefault(player, Bond.NONE); }

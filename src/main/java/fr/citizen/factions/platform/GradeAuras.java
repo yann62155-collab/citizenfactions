@@ -40,7 +40,7 @@ final class GradeAuras {
         if (!ready()) return;
         for (ServerPlayer p : rt.server().getPlayerList().getPlayers()) {
             Grade g = rt.service().gradeOf(p.getUUID());
-            String spec = g == null ? null : specFor(g.id());
+            String spec = g == null ? null : GradeValues.lookup(rt, p.getUUID(), Config.get(Config.GRADE_AURAS));
             try {
                 if (spec == null) { clear.invoke(null, p.getUUID(), SOURCE); continue; }
                 String[] colorStyle = spec.split(":", 2);
@@ -58,11 +58,4 @@ final class GradeAuras {
         try { clear.invoke(null, p.getUUID(), SOURCE); } catch (ReflectiveOperationException | RuntimeException ignored) { }
     }
 
-    private static String specFor(String gradeId) {
-        for (String line : Config.get(Config.GRADE_AURAS)) {
-            int i = line.indexOf('=');
-            if (i > 0 && line.substring(0, i).strip().equalsIgnoreCase(gradeId)) return line.substring(i + 1);
-        }
-        return null;
-    }
 }

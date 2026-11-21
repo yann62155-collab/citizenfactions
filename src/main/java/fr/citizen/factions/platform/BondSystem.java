@@ -83,6 +83,7 @@ public final class BondSystem {
         d.describe(info.species(), info.variantLabel(), info.corrupted(), name, info.tamed() ? info.owner() : null, info.stage());
         String prim = PrimordialState.kind(dragon);
         d.primordial(prim == null ? "" : prim);
+        d.downed(DragonDowned.isDowned(dragon));
         d.seen(dragon.level().dimension().location().toString(), dragon.getBlockX(), dragon.getBlockY(), dragon.getBlockZ(), System.currentTimeMillis());
         d.bonds().clear();
         d.bonds().putAll(readBonds(dragon));

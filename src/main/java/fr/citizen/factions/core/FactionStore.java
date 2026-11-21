@@ -132,6 +132,7 @@ public final class FactionStore {
             m.put("corrupted", d.corrupted()); m.put("name", d.customName()); m.put("owner", d.owner() == null ? "" : d.owner().toString());
             m.put("dim", d.dimension()); m.put("x", d.x()); m.put("y", d.y()); m.put("z", d.z()); m.put("stage", d.stage()); m.put("seen", d.lastSeen());
             m.put("primordial", d.primordial());
+            m.put("downed", d.downed());
             List<Object> bs = new ArrayList<>();
             for (Map.Entry<UUID, Bond> e : d.bonds().entrySet()) {
                 Map<String, Object> bm = new LinkedHashMap<>();
@@ -188,6 +189,7 @@ public final class FactionStore {
             d.describe(str(m, "species"), str(m, "variant"), Boolean.TRUE.equals(m.get("corrupted")), str(m, "name"),
                     owner.isBlank() ? null : UUID.fromString(owner), (int) num(m, "stage"));
             d.primordial(str(m, "primordial"));
+            d.downed(Boolean.TRUE.equals(m.get("downed")));
             d.seen(str(m, "dim"), (int) num(m, "x"), (int) num(m, "y"), (int) num(m, "z"), num(m, "seen"));
             for (Map<String, Object> bm : list(m, "bonds")) {
                 Object v = bm.get("value");

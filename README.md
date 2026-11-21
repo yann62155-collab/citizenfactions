@@ -13,7 +13,7 @@ règles de monte des dragons **Ice and Fire** et lien progressif joueur / dragon
 
 ## Installation
 
-1. Placez `citizenfactions-1.2.0.jar` dans `mods/` **du serveur et des joueurs** (l'interface et la barre de lien sont côté client).
+1. Placez `citizenfactions-1.3.0.jar` dans `mods/` **du serveur et des joueurs** (l'interface et la barre de lien sont côté client).
    Avec Citizen Updater, déposez simplement le jar dans le pack.
 2. Ice and Fire doit être installé (sinon le mod démarre mais ne reconnaît aucun dragon ; un avertissement apparaît dans les logs).
 3. Au premier démarrage, les factions **Dragonnier** et **Chasseur de dragon** sont créées avec leurs grades et emblèmes.
@@ -67,8 +67,28 @@ s'il ne trouve pas ces méthodes dans le portage, il ne fait rien (le dragon gar
 
 ## Auras de grade (avec Citizen Aura 1.2.0+)
 
-Alpha : **éclair blanc**, Primodiau : **éclair rouge**, dans toutes les factions. Mis à jour toutes les 2 secondes
+Alpha : **éclair blanc** ; Primodiau Dragonnier : **éclair bleu clair** ; Primodiau Chasseur : **éclair rouge**. Mis à jour toutes les 2 secondes
 (changement de grade, exclusion…). Réglable dans `[auras] gradeAuras`. Une aura donnée à la main avec `/aura donner` reste prioritaire.
+
+## Points de vie (compteur au lieu des cœurs)
+
+| Grade | PV |
+|---|---|
+| Primodiau | 5000 |
+| Alpha | 2500 |
+| Confirmé | 1100 |
+| Petit (et grades non listés) | 900 |
+| Sans faction | 20 |
+
+Les cœurs sont remplacés par un compteur « ❤ PV / max ». La vie réelle reste celle de Minecraft (l'attribut vanilla
+est plafonné à 1024) : les dégâts reçus sont divisés par (PV du grade ÷ vie max), régénération et potions restent proportionnelles.
+Dragons : résistance ×7 si le propriétaire est Primodiau, ×3 s'il est Alpha (×2 de plus pour un primordial). Section `[sante]`.
+
+## Dragons à terre
+
+Un dragon apprivoisé (ou primordial) ne meurt plus : il reste au sol dans la pose de carcasse d'Ice and Fire, immobile et
+invulnérable, jusqu'à ce qu'un **Dragonnier ou un Chasseur de dragon** le sauve (clic droit avec une **pomme dorée**,
+consommée ; il revient avec 25 % de vie). Propriétaire, couleur, statut primordial et **lien** sont conservés. Section `[aterre]`.
 
 ## Interface
 
@@ -110,7 +130,7 @@ Les joueurs hors ligne sont gérés (ils doivent s'être connectés au moins une
 
 ## Compilation
 
-`./gradlew build` → `build/libs/citizenfactions-1.2.0.jar`. GitHub Actions compile et publie une Release à chaque push.
+`./gradlew build` → `build/libs/citizenfactions-1.3.0.jar`. GitHub Actions compile et publie une Release à chaque push.
 
 ## Compatibilité
 

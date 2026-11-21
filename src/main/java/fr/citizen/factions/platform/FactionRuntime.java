@@ -28,6 +28,7 @@ public final class FactionRuntime {
     private final FactionStore store;
     private final FactionUi ui;
     private final BondSystem bonds;
+    private final HealthSystem health;
     private final Map<UUID, long[]> rate = new HashMap<>();
     private int ticks;
     private long lastSaveError;
@@ -45,6 +46,7 @@ public final class FactionRuntime {
         store.save(service);
         this.ui = new FactionUi(service, new Env());
         this.bonds = new BondSystem(this);
+        this.health = new HealthSystem(this);
         CitizenFactions.LOGGER.info("Citizen Factions : {} faction(s), {} membre(s), {} dragon(s) chargés depuis {}",
                 service.factions().size(), countMembers(), service.dragons().size(), store.file());
     }
@@ -70,6 +72,7 @@ public final class FactionRuntime {
     public FactionService service() { return service; }
     public FactionUi ui() { return ui; }
     public BondSystem bonds() { return bonds; }
+    public HealthSystem health() { return health; }
 
     private int countMembers() {
         int n = 0;
@@ -85,7 +88,7 @@ public final class FactionRuntime {
         }
         if (ticks % 20 == 0) bonds.tickSecond();
         if (ticks % 200 == 0) bonds.tickSlow();
-        if (ticks % 40 == 0) GradeAuras.refresh(this);
+        if (ticks % 40 == 0) { GradeAuras.refresh(this); health.sync(); }
         if (ticks % 100 == 0 && service.dirty()) saveNow();
         if (ticks % 1200 == 0) rate.clear();
     }
@@ -110,6 +113,7 @@ public final class FactionRuntime {
         service.seen(p.getUUID(), p.getGameProfile().getName());
         bonds.onLogout(p);
         GradeAuras.remove(p);
+        health.forget(p);
     }
 
     public void open(ServerPlayer p, String view, Map<String, String> params) {

@@ -413,6 +413,7 @@ public final class Commands {
         line(c, "== " + d.displayName() + " ==", ChatFormatting.GOLD);
         line(c, "UUID : " + d.uuid(), ChatFormatting.GRAY);
         line(c, d.speciesLabel() + " — " + d.variant() + (d.corrupted() ? " (CORROMPU)" : " (non corrompu)") + " — stade " + d.stage(), ChatFormatting.YELLOW);
+        if (d.downed()) line(c, "✖ À TERRE (en attente de sauvetage)", ChatFormatting.RED);
         if (!d.primordial().isBlank()) line(c, "★ " + Primordial.label(d.primordial()) + " (faction " + d.primordial() + ")", ChatFormatting.LIGHT_PURPLE);
         line(c, "Propriétaire : " + (d.owner() == null ? "aucun (sauvage)" : rt.nameOf(d.owner())), ChatFormatting.YELLOW);
         line(c, "Position : " + d.dimension() + " " + d.x() + " " + d.y() + " " + d.z() + " (" + date(d.lastSeen()) + ")", ChatFormatting.GRAY);

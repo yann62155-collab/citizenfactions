@@ -41,7 +41,8 @@ public final class Primordial {
     static final String NBT_KEY = "primordial";
     private static final ResourceLocation MOD_ID = ResourceLocation.fromNamespaceAndPath(CitizenFactions.MOD_ID, "primordial");
     private static final DustParticleOptions RED_EMBER = new DustParticleOptions(new Vector3f(0.85F, 0.05F, 0.05F), 1.6F);
-    private static final DustParticleOptions BLUE_EMBER = new DustParticleOptions(new Vector3f(0.25F, 0.55F, 1.0F), 1.6F);
+    private static final DustParticleOptions BLUE_EMBER = new DustParticleOptions(new Vector3f(0.25F, 0.55F, 1.0F), 3.0F);
+    private static final DustParticleOptions BLUE_CORE = new DustParticleOptions(new Vector3f(0.75F, 0.92F, 1.0F), 4.0F);
 
     private Primordial() { }
 
@@ -125,7 +126,7 @@ public final class Primordial {
     /** Modificateurs PERMANENTS (sauvegardes avec le dragon) : Ice and Fire ne change que la valeur de base selon l'age. */
     static void applyStats(Entity e) {
         if (!(e instanceof LivingEntity l)) return;
-        set(l, Attributes.MAX_HEALTH, Config.get(Config.PRIMORDIAL_HEALTH));
+        set(l, Attributes.MAX_HEALTH, 1.0); // la vie x2 passe par HealthSystem (pas de plafond 1024) : retire l'ancien bonus
         set(l, Attributes.ATTACK_DAMAGE, Config.get(Config.PRIMORDIAL_DAMAGE));
         set(l, Attributes.MOVEMENT_SPEED, Config.get(Config.PRIMORDIAL_SPEED));
         set(l, Attributes.FLYING_SPEED, Config.get(Config.PRIMORDIAL_SPEED));
@@ -147,19 +148,48 @@ public final class Primordial {
         String k = of(e);
         if (k == null || !Boolean.TRUE.equals(callBool(e, "isBreathingFire"))) return;
         boolean blue = DRAGONNIER.factionId().equals(k);
-        ParticleOptions flame = blue ? ParticleTypes.SOUL_FIRE_FLAME : ParticleTypes.FLAME;
-        ParticleOptions ember = blue ? BLUE_EMBER : RED_EMBER;
-
         Vec3 head = headPosition(e);
         Vec3 dir = Vec3.directionFromRotation(e.getXRot(), e instanceof LivingEntity l ? l.getYHeadRot() : e.getYRot());
         float size = PrimordialState.sizeFactor(e);
         RandomSource r = new RandomSource();
-        for (int i = 0; i < 14; i++) {
-            double dist = 1 + r.next() * 10 * size;
-            Vec3 p = head.add(dir.scale(dist)).add((r.next() - 0.5) * dist * 0.35, (r.next() - 0.5) * dist * 0.35, (r.next() - 0.5) * dist * 0.35);
-            Vec3 v = dir.scale(0.35 + r.next() * 0.4);
-            level.sendParticles(i % 3 == 0 ? ember : flame, p.x, p.y, p.z, 0, v.x, v.y, v.z, 1.0);
+        // particules forcees : visibles de loin (le souffle d'un primordial est enorme)
+        List<ServerPlayer> viewers = new ArrayList<>();
+        for (ServerPlayer v : level.players()) if (v.distanceToSqr(e) < 160 * 160) viewers.add(v);
+        if (viewers.isEmpty()) return;
+
+        if (blue) {
+            // Dragonnier : torrent de flammes bleues, large et long, coeur blanc-bleu, ames qui s'elevent
+            double length = 14 * size;
+            for (int i = 0; i < 60; i++) {
+                double dist = 1 + Math.pow(r.next(), 0.7) * length;
+                double spread = 0.25 + dist * 0.12;
+                Vec3 p = head.add(dir.scale(dist)).add((r.next() - 0.5) * spread * 2, (r.next() - 0.5) * spread * 2, (r.next() - 0.5) * spread * 2);
+                Vec3 v = dir.scale(0.5 + r.next() * 0.6);
+                ParticleOptions type = i % 6 == 0 ? BLUE_CORE : i % 3 == 0 ? BLUE_EMBER : ParticleTypes.SOUL_FIRE_FLAME;
+                send(viewers, type, p, v, 1.0);
+            }
+            for (int i = 0; i < 6; i++) {
+                Vec3 p = head.add(dir.scale(length * (0.5 + r.next() * 0.5))).add((r.next() - 0.5) * 3, r.next() * 2, (r.next() - 0.5) * 3);
+                send(viewers, ParticleTypes.SOUL, p, new Vec3(0, 0.08, 0), 1.0);
+            }
+            // flammes bleues au point d'impact
+            Vec3 end = head.add(dir.scale(length));
+            for (int i = 0; i < 10; i++) send(viewers, ParticleTypes.SOUL_FIRE_FLAME,
+                    end.add((r.next() - 0.5) * 4, r.next() * 1.5, (r.next() - 0.5) * 4), new Vec3(0, 0.05, 0), 1.0);
+        } else {
+            // Chasseur : flammes rouges
+            for (int i = 0; i < 20; i++) {
+                double dist = 1 + r.next() * 10 * size;
+                Vec3 p = head.add(dir.scale(dist)).add((r.next() - 0.5) * dist * 0.35, (r.next() - 0.5) * dist * 0.35, (r.next() - 0.5) * dist * 0.35);
+                Vec3 v = dir.scale(0.35 + r.next() * 0.4);
+                send(viewers, i % 3 == 0 ? RED_EMBER : ParticleTypes.FLAME, p, v, 1.0);
+            }
         }
+    }
+
+    private static void send(List<ServerPlayer> viewers, ParticleOptions type, Vec3 p, Vec3 v, double speed) {
+        for (ServerPlayer pl : viewers)
+            pl.serverLevel().sendParticles(pl, type, true, p.x, p.y, p.z, 0, v.x, v.y, v.z, speed);
     }
 
     private static Vec3 headPosition(Entity e) {

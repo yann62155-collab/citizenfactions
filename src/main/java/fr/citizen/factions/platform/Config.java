@@ -33,6 +33,13 @@ public final class Config {
     public static final ModConfigSpec.DoubleValue PRIMORDIAL_ARMOR;
     public static final ModConfigSpec.IntValue PRIMORDIAL_BURN_SECONDS;
     public static final ModConfigSpec.ConfigValue<List<? extends String>> GRADE_AURAS;
+    public static final ModConfigSpec.BooleanValue HP_ENABLED;
+    public static final ModConfigSpec.BooleanValue DOWNED_ENABLED;
+    public static final ModConfigSpec.BooleanValue DOWNED_WILD;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> REVIVE_ITEMS;
+    public static final ModConfigSpec.DoubleValue REVIVE_HEALTH;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> PLAYER_HP;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> DRAGON_HP;
 
     static {
         ModConfigSpec.Builder b = new ModConfigSpec.Builder();
@@ -93,10 +100,31 @@ public final class Config {
         b.pop();
 
         b.comment("Auras de grade, affichées par le mod Citizen Aura (s'il est installé)").push("auras");
-        GRADE_AURAS = b.comment("« identifiant_du_grade=RRGGBB:style » (styles : eclair, orbite, spirale, halo). S'applique à toutes les factions.",
+        GRADE_AURAS = b.comment("« grade=RRGGBB:style » pour toutes les factions, ou « faction/grade=RRGGBB:style » pour une seule (prioritaire).",
+                        " Styles : eclair, orbite, spirale, halo.",
                         " Une aura donnée à la main avec /aura donner reste prioritaire.")
-                .defineListAllowEmpty("gradeAuras", List.of("alpha=FFFFFF:eclair", "primodiau=E02020:eclair"),
+                .defineListAllowEmpty("gradeAuras", List.of("alpha=FFFFFF:eclair", "dragonnier/primodiau=8FD8FF:eclair", "chasseur/primodiau=E02020:eclair"),
                         () -> "alpha=FFFFFF:eclair", o -> o instanceof String);
+        b.pop();
+
+        b.comment("Dragons à terre : au lieu de mourir, un dragon apprivoisé reste au sol (carcasse) jusqu'à ce qu'on le sauve").push("aterre");
+        DOWNED_ENABLED = b.comment("Active le système (dragons apprivoisés et primordiaux).").define("enabled", true);
+        DOWNED_WILD = b.comment("S'applique aussi aux dragons sauvages (déconseillé : plus de butin de dragon).").define("includeWildDragons", false);
+        REVIVE_ITEMS = b.comment("Objets permettant à un Dragonnier ou un Chasseur de dragon de sauver un dragon à terre (consommé).")
+                .defineListAllowEmpty("reviveItems", List.of("minecraft:golden_apple", "minecraft:enchanted_golden_apple"),
+                        () -> "minecraft:golden_apple", o -> o instanceof String);
+        REVIVE_HEALTH = b.comment("Part de la vie rendue au dragon sauvé (0.25 = 25 %).").defineInRange("reviveHealth", 0.25, 0.01, 1.0);
+        b.pop();
+
+        b.comment("Points de vie en nombre (les cœurs sont remplacés par un compteur de PV)").push("sante");
+        HP_ENABLED = b.comment("Active les PV par grade et le compteur de PV (sinon : cœurs vanilla).").define("enabled", true);
+        PLAYER_HP = b.comment("PV des joueurs : « grade=PV » (toutes factions) ou « faction/grade=PV ».",
+                        " « aucune » = joueurs sans faction ; « * » = grades non listés.")
+                .defineListAllowEmpty("playerHp", List.of("primodiau=5000", "alpha=2500", "confirme=1100", "petit=900", "*=900", "aucune=20"),
+                        () -> "petit=900", o -> o instanceof String);
+        DRAGON_HP = b.comment("Résistance des dragons selon le grade de leur PROPRIÉTAIRE : « grade=multiplicateur » (ou « faction/grade=... »).",
+                        " Se cumule avec healthMultiplier des primordiaux.")
+                .defineListAllowEmpty("dragonHpByOwnerGrade", List.of("primodiau=7", "alpha=3"), () -> "alpha=3", o -> o instanceof String);
         b.pop();
         SPEC = b.build();
     }

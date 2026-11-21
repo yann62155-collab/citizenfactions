@@ -49,6 +49,7 @@ public final class DragonGuard {
         if (rt == null) return null;
         Entity target = DragonBridge.root(rawTarget);
         if (!DragonBridge.isDragon(target) || !(target instanceof LivingEntity dragon)) return null;
+        if (DragonDowned.isDowned(target)) return DragonDowned.interact(p, dragon, stack, hand == InteractionHand.MAIN_HAND);
         DragonBridge.Info info = DragonBridge.info(target);
         boolean mine = info.tamed() && p.getUUID().equals(info.owner());
         if (mine) rt.bonds().sync(target); // le dragon apparait dans « Mes dragons » meme s'il n'a jamais ete monte
@@ -86,7 +87,7 @@ public final class DragonGuard {
         if (mounting instanceof ServerPlayer sp && DragonBridge.isDragon(mounted)) { p = sp; dragon = mounted; }
         else if (mounted instanceof ServerPlayer sp && DragonBridge.isDragon(mounting)) { p = sp; dragon = mounting; } // petit dragon sur l'epaule
         else return;
-        String deny = rt.bonds().denyReason(p, DragonBridge.info(dragon));
+        String deny = DragonDowned.isDowned(dragon) ? "Ce dragon est à terre : sauvez-le d'abord." : rt.bonds().denyReason(p, DragonBridge.info(dragon));
         if (deny == null) return;
         e.setCanceled(true);
         rt.message(p, deny);

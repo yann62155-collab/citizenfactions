@@ -21,6 +21,7 @@ public final class Network {
     public static volatile Consumer<String> clientViewHandler;
     public static volatile Consumer<BondPayload> clientBondHandler;
     public static volatile Consumer<PrimordialPayload> clientPrimordialHandler;
+    public static volatile Consumer<HpPayload> clientHpHandler;
 
     private Network() { }
 
@@ -36,6 +37,10 @@ public final class Network {
         });
         r.playToClient(PrimordialPayload.TYPE, PrimordialPayload.CODEC, (p, ctx) -> {
             Consumer<PrimordialPayload> h = clientPrimordialHandler;
+            if (h != null) h.accept(p);
+        });
+        r.playToClient(HpPayload.TYPE, HpPayload.CODEC, (p, ctx) -> {
+            Consumer<HpPayload> h = clientHpHandler;
             if (h != null) h.accept(p);
         });
         r.playToServer(ActionPayload.TYPE, ActionPayload.CODEC, Network::onAction);
@@ -65,6 +70,10 @@ public final class Network {
 
     public static void send(ServerPlayer player, View view) {
         PacketDistributor.sendToPlayer(player, new ViewPayload(ViewCodec.toJson(view)));
+    }
+
+    public static void sendHp(ServerPlayer player, HpPayload p) {
+        PacketDistributor.sendToPlayer(player, p);
     }
 
     public static void sendBond(ServerPlayer player, BondPayload p) {

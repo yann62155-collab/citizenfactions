@@ -61,10 +61,16 @@ public class CitizenFactions {
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, DragonGuard::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, DragonGuard::onRightClickItem);
         NeoForge.EVENT_BUS.addListener(DragonGuard::onJoin);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, fr.citizen.factions.platform.DragonDowned::onDeath);
         NeoForge.EVENT_BUS.addListener(DragonGuard::onDeath);
         NeoForge.EVENT_BUS.addListener(DragonGuard::onLeave);
         NeoForge.EVENT_BUS.addListener(DragonGuard::onStartTracking);
         NeoForge.EVENT_BUS.addListener(DragonGuard::onIncomingDamage);
+        // en dernier : les degats finaux (apres armure et autres mods) sont rapportes aux PV du grade
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, (net.neoforged.neoforge.event.entity.living.LivingDamageEvent.Pre e) -> {
+            FactionRuntime rt = FactionRuntime.current();
+            if (rt != null && !e.getEntity().level().isClientSide()) rt.health().onDamage(e);
+        });
 
         if (FMLEnvironment.dist == Dist.CLIENT) fr.citizen.factions.client.ClientSetup.init(modBus);
     }

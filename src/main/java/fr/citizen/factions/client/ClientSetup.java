@@ -32,12 +32,15 @@ public final class ClientSetup {
     public static void init(IEventBus modBus) {
         modBus.addListener((RegisterKeyMappingsEvent e) -> e.register(OPEN_KEY));
         modBus.addListener(BondHud::register);
+        modBus.addListener(HpHud::register);
+        NeoForge.EVENT_BUS.addListener(HpHud::onLayer);
+        Network.clientHpHandler = p -> Minecraft.getInstance().execute(() -> HpHud.update(p));
         Network.clientBondHandler = p -> Minecraft.getInstance().execute(() -> BondHud.update(p));
         Network.clientPrimordialHandler = p -> {
             if (p.kind().isEmpty()) PrimordialState.CLIENT.remove(p.uuid());
             else PrimordialState.CLIENT.put(p.uuid(), p.kind());
         };
-        NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> PrimordialState.CLIENT.clear());
+        NeoForge.EVENT_BUS.addListener((ClientPlayerNetworkEvent.LoggingOut e) -> { PrimordialState.CLIENT.clear(); HpHud.reset(); });
         NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post e) -> {
             Minecraft mc = Minecraft.getInstance();
             while (OPEN_KEY.consumeClick()) {
